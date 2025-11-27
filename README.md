@@ -4,6 +4,7 @@ An MCP (Model Context Protocol) server that enables LLMs to interact with SQLite
 
 Built with **async/await** patterns using `aiosqlite` for non-blocking database operations.
 
+
 ## Features
 
 - **list_tables** - Get all table names in the database
@@ -11,10 +12,12 @@ Built with **async/await** patterns using `aiosqlite` for non-blocking database 
 - **get_schema** - Get complete database schema as CREATE TABLE statements
 - **query** - Execute read-only SQL queries (SELECT only)
 
+
 ## Prerequisites
 
 - Python 3.13+
 - [uv](https://docs.astral.sh/uv/) package manager
+
 
 ## Installation
 
@@ -24,6 +27,7 @@ Built with **async/await** patterns using `aiosqlite` for non-blocking database 
 ```bash
 uv sync
 ```
+
 
 ## Quick Start with Sample Data
 
@@ -45,6 +49,7 @@ This creates `crm.db` with sample CRM data:
 ### 2. Run the MCP server
 
 See [Running the Server](#running-the-server) below.
+
 
 ## Running the Server
 
@@ -70,6 +75,7 @@ uv run sqlite_mcp_server.py
 ```
 
 This starts the server in **stdio mode**, ready for LLM clients to connect.
+
 
 ## Client Configuration
 

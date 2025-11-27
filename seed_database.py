@@ -100,7 +100,7 @@ INDUSTRIES = [
 ROLES = ["Sales Rep", "Account Executive", "Sales Manager", "SDR", "VP Sales"]
 
 DEAL_STAGES = [
-    ("Prospecting", 10),
+    ("Prospecting", 10), # 10% chance of being closed won
     ("Qualification", 20),
     ("Proposal", 40),
     ("Negotiation", 60),
@@ -221,8 +221,9 @@ def seed_deals(conn: sqlite3.Connection, contact_ids: list[int], user_ids: list[
     return deals
 
 
-def seed_activities(conn: sqlite3.Connection, contact_ids: list[int], deal_ids: list[int], count: int = 30) -> None:
-    """Seed activities table."""
+def seed_activities(conn: sqlite3.Connection, contact_ids: list[int], deal_ids: list[int], count: int = 30) -> list[int]:
+    """Seed activities table and return list of activity IDs."""
+    activities = []
     for _ in range(count):
         activity_type = random.choice(ACTIVITY_TYPES)
         description = fake.sentence()
@@ -231,12 +232,14 @@ def seed_activities(conn: sqlite3.Connection, contact_ids: list[int], deal_ids: 
         due_date = datetime.now() + timedelta(days=random.randint(-14, 30))
         completed = 1 if due_date < datetime.now() else random.choice([0, 0, 0, 1])
         
-        conn.execute(
+        cursor = conn.execute(
             "INSERT INTO activities (type, description, contact_id, deal_id, due_date, completed) VALUES (?, ?, ?, ?, ?, ?)",
             (activity_type, description, contact_id, deal_id, due_date.strftime("%Y-%m-%d"), completed)
         )
+        activities.append(cursor.lastrowid)
     
     conn.commit()
+    return activities
 
 
 def main():
@@ -251,29 +254,30 @@ def main():
     clear_data(conn)
     
     print("Seeding users...")
-    user_ids = seed_users(conn, count=5)
+    user_ids = seed_users(conn, count=10)
     print(f"  Created {len(user_ids)} users")
     
     print("Seeding companies...")
-    company_ids = seed_companies(conn, user_ids, count=20)
+    company_ids = seed_companies(conn, user_ids, count=40)
     print(f"  Created {len(company_ids)} companies")
     
     print("Seeding contacts...")
-    contact_ids = seed_contacts(conn, company_ids, count=40)
+    contact_ids = seed_contacts(conn, company_ids, count=80)
     print(f"  Created {len(contact_ids)} contacts")
     
     print("Seeding deals...")
-    deal_ids = seed_deals(conn, contact_ids, user_ids, count=25)
+    deal_ids = seed_deals(conn, contact_ids, user_ids, count=50)
     print(f"  Created {len(deal_ids)} deals")
     
     print("Seeding activities...")
-    seed_activities(conn, contact_ids, deal_ids, count=30)
-    print(f"  Created 30 activities")
+    activity_ids = seed_activities(conn, contact_ids, deal_ids, count=60)
+    print(f"  Created {len(activity_ids)} activities")
     
     conn.close()
     
+    total_records = len(user_ids) + len(company_ids) + len(contact_ids) + len(deal_ids) + len(activity_ids)
     print(f"\nDatabase seeded successfully: {db_path}")
-    print("Total records: ~120")
+    print(f"Total records: {total_records}")
 
 
 if __name__ == "__main__":
